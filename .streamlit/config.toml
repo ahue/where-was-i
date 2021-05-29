@@ -1,0 +1,14 @@
+[server]
+
+# Max size, in megabytes, for files uploaded with the file_uploader.
+# Default: 200
+maxUploadSize = 2000
+
+# Automatically rerun script when the file is modified on disk.
+# Default: false
+runOnSave = true
+
+[logger]
+# Level of logging: 'error', 'warning', 'info', or 'debug'.
+# Default: 'info'
+level = "debug"
