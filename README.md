@@ -1,12 +1,12 @@
 # where-was-i
 
-A short summary of the project
+Streamlit app to search Google Location History for places
 
 ## Dependencies
 
+* `streamlit`
 * `holidays`
 * `pendulum`
-* `streamlit`
 
 To use the app, you need a Google account you can export your location history from
 
