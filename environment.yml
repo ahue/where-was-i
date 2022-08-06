@@ -11,3 +11,5 @@ dependencies:
   - numpy
   - holidays
   - ipywidgets
+  - streamlit
+  - pendulum
