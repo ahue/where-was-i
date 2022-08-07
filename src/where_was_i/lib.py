@@ -8,6 +8,7 @@ import holidays
 import numpy as np
 import pandas as pd
 import streamlit as st
+import pendulum as pm
 
 
 def filter_year(df: pd.DataFrame, year: int):
@@ -29,9 +30,9 @@ def filter_year(df: pd.DataFrame, year: int):
 
     df = df.copy()
     # parse time
-    df.loc[:, "time"] = pd.to_datetime(
-        pd.to_numeric(df.timestampMs), unit='ms').dt.tz_localize(
-            'UTC').dt.tz_convert('Europe/Berlin')
+    df.loc[:, "time"] = pd.to_datetime(df.timestamp) \
+            .dt.tz_convert('Europe/Berlin')
+            # .dt.tz_localize('UTC').
     
     df = df[df.time.dt.year == year]
 
@@ -70,11 +71,14 @@ def clean_lhdf(df: pd.DataFrame):
 
     df = df.copy()
     # Drop unneccessary cols
-    df.drop(labels=["activity", "altitude", "heading"], axis=1, inplace=True)
+    # df.drop(labels=["activity", "altitude", "heading"], axis=1, inplace=True)
 
 
 
     # compute time cols
+    # df.loc[:, "date"] = df.timestamp.dt.strftime("%Y-%m-%d")
+    # df.loc[:, "weekday"] = df.timestamp.dt.strftime("%w") #was: %u
+    # df.loc[:, "daytime"] = df.timestamp.dt.strftime("%H:%M")
     df.loc[:, "date"] = df.time.dt.strftime("%Y-%m-%d")
     df.loc[:, "weekday"] = df.time.dt.strftime("%w") #was: %u
     df.loc[:, "daytime"] = df.time.dt.strftime("%H:%M")

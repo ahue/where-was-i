@@ -3,11 +3,15 @@
 from datetime import datetime
 from io import StringIO
 from json import load
+import ijson
+import bigjson
 
 import pandas as pd
 import pendulum as pm
 import streamlit as st
 import yaml
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+
 
 from where_was_i import lib
 
@@ -30,7 +34,9 @@ with st.form(key="my_form"):
 
     st.markdown("### Location History")
 
-    ul_lh_file = st.file_uploader("Select location history file")
+    ul_lh_file = st.file_uploader("Select location history file"
+        #, accept_multiple_files=True
+    )
 
     submit = st.form_submit_button(label="Go")
 
@@ -70,9 +76,30 @@ st.markdown(f"""
 
 @st.cache
 def load_lh(fh):
-    lh = load(fh)["locations"]
-    df = pd.DataFrame(lh)
-    return df
+    # https://pythonspeed.com/articles/json-memory-streaming/
+    lh = ijson.items(fh, "locations.item")
+    # lh = bigjson.load(fh)['locations']
+    records = []
+    cur_year = None
+    attributes = set()
+    for record in lh:
+        if cur_year != int(record['timestamp'][0:4]):
+            cur_year = int(record['timestamp'][0:4])
+            print(cur_year)
+        if cur_year != year:
+            continue
+        attributes.update(record.keys())
+        records.append({
+            "latitudeE7": record['latitudeE7'],
+            "longitudeE7": record['longitudeE7'],
+            "accuracy": record['accuracy'],
+            "timestamp": record['timestamp'] #pm.parse(record['timestamp'])
+        })
+    st.write(attributes) # will cause CachedStFunctionWarning 
+    df = pd.DataFrame.from_records(records)
+    # lh = load(fh)["locations"]
+    # df = pd.DataFrame(lh)
+    return df 
 
 with st.spinner("Loading location data"):
     lhdf = load_lh(ul_lh_file)
@@ -130,7 +157,12 @@ st.write(visit_cnts.T)
 
 st.markdown(lib.get_table_download_link(visits), unsafe_allow_html=True)
 
-st.write(visits[visits.longest_stay].pivot(index="date", columns="area", values="stayed"))
+try: 
+    st.write(visits[visits.longest_stay].pivot(index="date", columns="area", values="stayed"))
+except:
+    AgGrid(visits)
+
+
 
 # Actual Vacation Days
 vacation = pd.Series(lib.vacation_days(cfg))
@@ -141,3 +173,5 @@ vacation = vacation[pd.to_datetime(vacation).dt.strftime("%w").astype(int).isin(
 st.markdown(f"### Vaction Days ({len(vacation)})")
 
 st.write(vacation)
+
+# %%
