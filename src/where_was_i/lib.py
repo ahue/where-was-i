@@ -8,12 +8,10 @@ import holidays
 import numpy as np
 import pandas as pd
 import streamlit as st
-import pendulum as pm
-
 
 def filter_year(df: pd.DataFrame, year: int):
     """
-    Computes at `time` columns from `timestampMs` and returns a copy of `df`, filtered on `year`
+    Computes at `time` columns from `timestamp` and returns a copy of `df`, filtered on `year`
 
     Parameters
     ----------
@@ -32,7 +30,6 @@ def filter_year(df: pd.DataFrame, year: int):
     # parse time
     df.loc[:, "time"] = pd.to_datetime(df.timestamp) \
             .dt.tz_convert('Europe/Berlin')
-            # .dt.tz_localize('UTC').
     
     df = df[df.time.dt.year == year]
 
@@ -42,7 +39,7 @@ def filter_year(df: pd.DataFrame, year: int):
 # %%
 def clean_lhdf(df: pd.DataFrame):
     """
-    Removes unneccessary columms from the location history data frame and computes new required columns
+    Computes new required columns
 
     Parameters
     ----------
@@ -52,10 +49,6 @@ def clean_lhdf(df: pd.DataFrame):
     Returns
     -------
     Copy of `df`, altered the following way:
-    * Colums removed
-        * `activity`
-        * `altitude`
-        * `heading`
     * Columns expected in `df`
         * `time`
         * `latitudeE7`
@@ -70,15 +63,8 @@ def clean_lhdf(df: pd.DataFrame):
 
 
     df = df.copy()
-    # Drop unneccessary cols
-    # df.drop(labels=["activity", "altitude", "heading"], axis=1, inplace=True)
-
-
 
     # compute time cols
-    # df.loc[:, "date"] = df.timestamp.dt.strftime("%Y-%m-%d")
-    # df.loc[:, "weekday"] = df.timestamp.dt.strftime("%w") #was: %u
-    # df.loc[:, "daytime"] = df.timestamp.dt.strftime("%H:%M")
     df.loc[:, "date"] = df.time.dt.strftime("%Y-%m-%d")
     df.loc[:, "weekday"] = df.time.dt.strftime("%w") #was: %u
     df.loc[:, "daytime"] = df.time.dt.strftime("%H:%M")

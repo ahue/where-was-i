@@ -4,13 +4,12 @@ from datetime import datetime
 from io import StringIO
 from json import load
 import ijson
-import bigjson
 
 import pandas as pd
 import pendulum as pm
 import streamlit as st
 import yaml
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+from st_aggrid import AgGrid
 
 
 from where_was_i import lib
@@ -78,7 +77,6 @@ st.markdown(f"""
 def load_lh(fh):
     # https://pythonspeed.com/articles/json-memory-streaming/
     lh = ijson.items(fh, "locations.item")
-    # lh = bigjson.load(fh)['locations']
     records = []
     cur_year = None
     attributes = set()
@@ -95,10 +93,8 @@ def load_lh(fh):
             "accuracy": record['accuracy'],
             "timestamp": record['timestamp'] #pm.parse(record['timestamp'])
         })
-    st.write(attributes) # will cause CachedStFunctionWarning 
+    # st.write(attributes) # will cause CachedStFunctionWarning 
     df = pd.DataFrame.from_records(records)
-    # lh = load(fh)["locations"]
-    # df = pd.DataFrame(lh)
     return df 
 
 with st.spinner("Loading location data"):
