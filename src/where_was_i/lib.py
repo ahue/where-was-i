@@ -108,8 +108,11 @@ def vacation_days(cfg: Dict):
     -------
     List of "YYYY-MM-DD"
     """
-
+    
     vacation = []
+    if not "vacation" in cfg.keys():
+        return vacation
+
     for vac in cfg["vacation"]:
         start = end = None
         if type(vac) == dict and "from" in vac.keys():
@@ -146,9 +149,9 @@ def vacation_mask(df: pd.DataFrame, cfg: Dict):
     -------
     A `pandas.Series` boolean mask of size `df.shape[0]`
     """
-
+    
     vacation = vacation_days(cfg)
-
+    
     mask = df.date.isin(vacation) == False 
     return mask
 
